@@ -1,39 +1,46 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_search/ui/common_search.dart';
+import 'package:flutter_search/core/data/search_data.dart';
 
-import '../core/extension/int_fit.dart';
+import '../../../core/extension/int_fit.dart';
+import '../../../ui/widgets/search_widget.dart';
 
-class WZMineFocusPage extends StatelessWidget {
-  static const routeName = "/mine_focus";
+//根据传过来的类别，具体的去搜索
+class WZDetailSearchFromCategoryPage extends StatelessWidget {
+  static const routeName = "detail_search";
 
-  const WZMineFocusPage({Key key}) : super(key: key);
+  const WZDetailSearchFromCategoryPage({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            WZSearchWidget(),
-            _makeTitleWidget(),
-            _makeList(),
-          ],
-        ),
-      ),
-    );
+    SearchData _searchData =
+        ModalRoute.of(context).settings.arguments as SearchData;
+    return Material(child: SafeArea(child: _contentWidget(_searchData)));
   }
 }
 
-Widget _makeTitleWidget() {
-  return Container(
-    width: double.infinity,
-    alignment: Alignment.centerLeft,
-    padding: EdgeInsets.only(left: 5.px),
-    height: 25.px,
-    color: Colors.grey.withOpacity(0.1),
-    child: Text("关注我的", style: TextStyle(fontWeight: FontWeight.bold),),
-  );
-}
+Widget _contentWidget(SearchData _searchData) => Container(
+      child: Column(
+        children: [
+          _searchWidget(),
+          _titleWidget(_searchData),
+          _listData(),
+        ],
+      ),
+    );
+
+Widget _searchWidget() => WZSearchWidget(
+      valueChanged: (value) {
+        print(value);
+      },
+    );
+
+Widget _titleWidget(SearchData _searchData) => Container(
+      height: 25.px,
+      color: Colors.grey.withOpacity(0.3),
+      padding: EdgeInsets.only(left: 10.px),
+      alignment: Alignment.centerLeft,
+      child: Text(_searchData.name),
+    );
 
 class UserInfo {
   final String icon;
@@ -77,7 +84,7 @@ List<UserInfo> _users = [
       1),
 ];
 
-Widget _makeList() {
+Widget _listData() {
   return Expanded(
     child: ListView.separated(
         itemBuilder: (context, index) => ListTile(
@@ -85,7 +92,7 @@ Widget _makeList() {
                 Navigator.pop(context);
               },
               leading: CircleAvatar(
-                child: ClipRRect(child: Image.network(_users[index].icon, fit: BoxFit.cover,), borderRadius: BorderRadius.circular(15.px)),
+                backgroundImage: NetworkImage(_users[index].icon),
               ),
               title: Text(_users[index].name),
               subtitle: Text(_users[index].phone),
@@ -94,10 +101,15 @@ Widget _makeList() {
                 style: ButtonStyle(
                     backgroundColor:
                         MaterialStateProperty.all(Colors.blueAccent)),
-                child: Text("相互关注", style: TextStyle(color: Colors.white),),
+                child: Text(
+                  "相互关注",
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ),
-        separatorBuilder: (context, index) => Divider(),
+        separatorBuilder: (context, index) => Divider(
+              height: 1.px,
+            ),
         itemCount: _users.length),
   );
 }
